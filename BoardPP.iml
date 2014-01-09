@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="scala" name="Scala">
+      <configuration>
+        <option name="compilerLibraryLevel" value="Project" />
+        <option name="compilerLibraryName" value="Maven: org.scala-lang:scala-compiler-bundle:2.10.3" />
+        <option name="compilerOptions" value="-make:transitive -dependencyfile $MODULE_DIR$/target/.scala_dependencies" />
+        <option name="vmOptions" value="" />
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: org.scala-lang:scala-compiler:2.10.3" level="project" />
+    <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.10.3" level="project" />
+    <orderEntry type="library" name="Maven: org.scala-lang:scala-reflect:2.10.3" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: org.slick2d:slick2d:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/slick2D/slick.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="Maven: org.lwjgl.lwjgl:lwjgl:2.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.lwjgl.lwjgl:lwjgl-platform:natives-windows:2.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.lwjgl.lwjgl:lwjgl-platform:natives-linux:2.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.lwjgl.lwjgl:lwjgl-platform:natives-osx:2.9.0" level="project" />
+    <orderEntry type="library" name="Maven: net.java.jinput:jinput:2.0.5" level="project" />
+    <orderEntry type="library" name="Maven: net.java.jutils:jutils:1.0.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: net.java.jinput:jinput-platform:natives-linux:2.0.5" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: net.java.jinput:jinput-platform:natives-windows:2.0.5" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: net.java.jinput:jinput-platform:natives-osx:2.0.5" level="project" />
+    <orderEntry type="library" name="slick" level="project" />
+  </component>
+</module>
+
