@@ -21,6 +21,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="slick" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-compiler:2.10.3" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.10.3" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-reflect:2.10.3" level="project" />
@@ -42,7 +43,6 @@
     <orderEntry type="library" scope="RUNTIME" name="Maven: net.java.jinput:jinput-platform:natives-linux:2.0.5" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: net.java.jinput:jinput-platform:natives-windows:2.0.5" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: net.java.jinput:jinput-platform:natives-osx:2.0.5" level="project" />
-    <orderEntry type="library" name="slick" level="project" />
   </component>
 </module>
 
