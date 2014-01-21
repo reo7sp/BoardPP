@@ -21,28 +21,64 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="slick" level="project" />
+    <orderEntry type="library" name="libgdx" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-compiler:2.10.3" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.10.3" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-reflect:2.10.3" level="project" />
     <orderEntry type="module-library">
-      <library name="Maven: org.slick2d:slick2d:1.0">
+      <library name="Maven: com.badlogic.gdx:gdx:0.9.9">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/slick2D/slick.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/libgdx/gdx.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="Maven: org.lwjgl.lwjgl:lwjgl:2.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.lwjgl.lwjgl:lwjgl-platform:natives-windows:2.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.lwjgl.lwjgl:lwjgl-platform:natives-linux:2.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.lwjgl.lwjgl:lwjgl-platform:natives-osx:2.9.0" level="project" />
-    <orderEntry type="library" name="Maven: net.java.jinput:jinput:2.0.5" level="project" />
-    <orderEntry type="library" name="Maven: net.java.jutils:jutils:1.0.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: net.java.jinput:jinput-platform:natives-linux:2.0.5" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: net.java.jinput:jinput-platform:natives-windows:2.0.5" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: net.java.jinput:jinput-platform:natives-osx:2.0.5" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: com.badlogic.gdx:gdx-natives:0.9.9">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/libgdx/gdx-natives.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: com.badlogic.gdx:gdx-backend-lwjgl:0.9.9">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/libgdx/gdx-backend-lwjgl.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: com.badlogic.gdx:gdx-backend-lwjgl-natives:0.9.9">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/libgdx/gdx-backend-lwjgl-natives.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: com.badlogic.gdx:gdx-freetype:0.9.9">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/libgdx/gdx-freetype.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: com.badlogic.gdx:gdx-freetype-natives:0.9.9">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/libgdx/gdx-freetype-natives.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
 

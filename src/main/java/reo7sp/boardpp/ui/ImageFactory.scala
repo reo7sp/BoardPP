@@ -2,29 +2,27 @@ package reo7sp.boardpp.ui
 
 import scala.collection.mutable
 import javax.swing.ImageIcon
-import org.newdawn.slick.Image
-import org.newdawn.slick.util.BufferedImageUtil
-import javax.imageio.ImageIO
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Texture
 
 /**
  * Created by reo7sp on 11/30/13 at 11:14 PM
  */
 object ImageFactory {
-  private[this] val cache = new mutable.HashMap[String, Image]()
+  private[this] val cache = new mutable.HashMap[String, Texture]()
 
-  def get(name: String): Image = {
+  def get(name: String): Texture = {
     val imageOption = cache.get(name)
-    var image: Image = null
+    var texture: Texture = null
 
     if (imageOption == None) {
-      val s = "/img/" + name
-      image = new Image(BufferedImageUtil.getTexture(s, ImageIO.read(getClass.getResource(s))))
-      cache += name -> image
+      texture = new Texture(Gdx.files.classpath("img/" + name))
+      cache += name -> texture
     } else {
-      image = imageOption.get
+      texture = imageOption.get
     }
 
-    image
+    texture
   }
 
   def getAwtIcon(name: String) = new ImageIcon(getClass.getResource("/img/" + name))

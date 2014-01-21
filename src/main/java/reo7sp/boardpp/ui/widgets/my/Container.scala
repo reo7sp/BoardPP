@@ -1,6 +1,5 @@
 package reo7sp.boardpp.ui.widgets.my
 
-import org.newdawn.slick.Graphics
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -9,10 +8,10 @@ import scala.collection.mutable.ArrayBuffer
 class Container extends Component {
   val elements = new ArrayBuffer[Component]
 
-  override def render(g: Graphics): Unit = {
-    super.render(g)
-    elements.foreach(_.render(g))
-    elements.foreach(_.drawTooltip(g))
+  override def render(): Unit = {
+    super.render()
+    elements.foreach(_.render())
+    elements.foreach(_.drawTooltip())
   }
 
   override def update(): Unit = elements.foreach(_.update())

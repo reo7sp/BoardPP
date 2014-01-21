@@ -4,12 +4,12 @@ import javax.swing._
 import javax.swing.event.{ChangeEvent, ChangeListener}
 import javax.swing.border.EmptyBorder
 import java.awt.event.{MouseEvent, MouseAdapter, ActionEvent, ActionListener}
-import reo7sp.boardpp.Canvas
 import reo7sp.boardpp.ui.ImageFactory
 import java.awt._
 import reo7sp.boardpp.board.bobj.BoardShape
 import reo7sp.boardpp.ui.widgets.awt.FancyButton
 import reo7sp.boardpp.util.Colors
+import reo7sp.boardpp.board.BoardSession
 
 /**
  * Created by reo7sp on 1/1/14 at 2:08 PM
@@ -32,24 +32,24 @@ case class BoardShapeEditor(bobj: BoardShape) extends JFrame("Редактиро
   root.add(editPanel)
 
   val color1Button = new JButton()
-  updateColorButton(color1Button, Colors.toAWT(bobj.color1))
+  updateColorButton(color1Button, Colors.toAwt(bobj.color1))
   color1Button.addMouseListener(new MouseAdapter {
     override def mouseClicked(p1: MouseEvent): Unit = {
-      val color = JColorChooser.showDialog(null, "Выберите цвет", Colors.toAWT(bobj.color1))
-      if (color != null) bobj.color1 = Colors.toSlick(color)
-      updateColorButton(color1Button, Colors.toAWT(bobj.color1))
+      val color = JColorChooser.showDialog(null, "Выберите цвет", Colors.toAwt(bobj.color1))
+      if (color != null) bobj.color1 = Colors.toGdx(color)
+      updateColorButton(color1Button, Colors.toAwt(bobj.color1))
       update()
     }
   })
   editPanel.setLeftComponent(color1Button)
 
   val color2Button = new JButton()
-  updateColorButton(color2Button, Colors.toAWT(bobj.color2))
+  updateColorButton(color2Button, Colors.toAwt(bobj.color2))
   color2Button.addMouseListener(new MouseAdapter {
     override def mouseClicked(p1: MouseEvent): Unit = {
-      val color = JColorChooser.showDialog(null, "Выберите цвет", Colors.toAWT(bobj.color2))
-      if (color != null) bobj.color2 = Colors.toSlick(color)
-      updateColorButton(color2Button, Colors.toAWT(bobj.color2))
+      val color = JColorChooser.showDialog(null, "Выберите цвет", Colors.toAwt(bobj.color2))
+      if (color != null) bobj.color2 = Colors.toGdx(color)
+      updateColorButton(color2Button, Colors.toAwt(bobj.color2))
       update()
     }
   })
@@ -98,7 +98,7 @@ case class BoardShapeEditor(bobj: BoardShape) extends JFrame("Редактиро
   deleteButton.setIcon(ImageFactory.getAwtIcon("delete.png"))
   deleteButton.addActionListener(new ActionListener {
     def actionPerformed(p1: ActionEvent): Unit = {
-      Canvas.board.curPage -= bobj
+      BoardSession.board.curPage -= bobj
       dispose()
     }
   })
@@ -134,8 +134,6 @@ case class BoardShapeEditor(bobj: BoardShape) extends JFrame("Редактиро
     bobj.y = yText.getValue.toString.toInt
     bobj.w = wText.getValue.toString.toInt
     bobj.h = hText.getValue.toString.toInt
-    bobj.invalidateGradient()
-    bobj.page.invalidate()
     repaint()
   }
 

@@ -1,7 +1,6 @@
 package reo7sp.boardpp.ui.bobjeditor
 
 import javax.swing._
-import reo7sp.boardpp.Canvas
 import java.awt.event.{MouseEvent, MouseAdapter, ActionEvent, ActionListener}
 import javax.swing.event.{ChangeEvent, ChangeListener}
 import javax.swing.border.EmptyBorder
@@ -10,6 +9,7 @@ import java.awt.{Color, FlowLayout, BorderLayout}
 import reo7sp.boardpp.board.bobj.BoardLine
 import reo7sp.boardpp.util.Colors
 import reo7sp.boardpp.ui.widgets.awt.FancyButton
+import reo7sp.boardpp.board.BoardSession
 
 /**
  * Created by reo7sp on 12/27/13 at 9:49 PM
@@ -39,12 +39,12 @@ case class BoardLineEditor(bobj: BoardLine) extends JFrame("Редактиров
 
   editPanel.add(new JLabel("   Цвет: "))
   val colorButton = new JButton()
-  updateColorButton(colorButton, Colors.toAWT(bobj.color))
+  updateColorButton(colorButton, Colors.toAwt(bobj.color))
   colorButton.addMouseListener(new MouseAdapter {
     override def mouseClicked(p1: MouseEvent): Unit = {
-      val color = JColorChooser.showDialog(null, "Выберите цвет", Colors.toAWT(bobj.color))
-      if (color != null) bobj.color = Colors.toSlick(color)
-      updateColorButton(colorButton, Colors.toAWT(bobj.color))
+      val color = JColorChooser.showDialog(null, "Выберите цвет", Colors.toAwt(bobj.color))
+      if (color != null) bobj.color = Colors.toGdx(color)
+      updateColorButton(colorButton, Colors.toAwt(bobj.color))
       update()
     }
   })
@@ -93,7 +93,7 @@ case class BoardLineEditor(bobj: BoardLine) extends JFrame("Редактиров
   deleteButton.setIcon(ImageFactory.getAwtIcon("delete.png"))
   deleteButton.addActionListener(new ActionListener {
     def actionPerformed(p1: ActionEvent): Unit = {
-      Canvas.board.curPage -= bobj
+      BoardSession.board.curPage -= bobj
       dispose()
     }
   })
@@ -130,7 +130,6 @@ case class BoardLineEditor(bobj: BoardLine) extends JFrame("Редактиров
     bobj.x2 = x2Text.getValue.toString.toInt
     bobj.y2 = y2Text.getValue.toString.toInt
     bobj.thickness = thicknessEdit.getValue.toString.toFloat
-    bobj.page.invalidate()
     repaint()
   }
 

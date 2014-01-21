@@ -4,13 +4,13 @@ import javax.swing._
 import javax.swing.event.{ChangeEvent, ChangeListener, DocumentEvent, DocumentListener}
 import javax.swing.border.EmptyBorder
 import java.awt.event.{ActionEvent, ActionListener}
-import java.net.URL
 import reo7sp.boardpp.util.SimpleFileFilter
-import reo7sp.boardpp.Canvas
 import reo7sp.boardpp.ui.ImageFactory
 import java.awt.{Color, BorderLayout}
 import reo7sp.boardpp.board.bobj.BoardImage
 import reo7sp.boardpp.ui.widgets.awt.{FancyButton, FancyTextField}
+import reo7sp.boardpp.board.BoardSession
+import java.net.URL
 
 /**
  * Created by reo7sp on 1/1/14 at 2:08 PM
@@ -103,7 +103,7 @@ case class BoardImageEditor(bobj: BoardImage) extends JFrame("Редактиро
   deleteButton.setIcon(ImageFactory.getAwtIcon("delete.png"))
   deleteButton.addActionListener(new ActionListener {
     def actionPerformed(p1: ActionEvent): Unit = {
-      Canvas.board.curPage -= bobj
+      BoardSession.board.curPage -= bobj
       dispose()
     }
   })
@@ -143,7 +143,6 @@ case class BoardImageEditor(bobj: BoardImage) extends JFrame("Редактиро
     bobj.y = yText.getValue.toString.toInt
     bobj.w = wText.getValue.toString.toInt
     bobj.h = hText.getValue.toString.toInt
-    bobj.page.invalidate()
     repaint()
   }
 }

@@ -6,10 +6,9 @@ package reo7sp.boardpp
 object Tools {
   val cursor = -1
   val pen = -2
-  val highlighter = -3
-  val eraser = -4
+  val eraser = -3
   val text = 1
   val image = 2
-  val shape = 3
+  val rect = 3
   val line = 4
 }
