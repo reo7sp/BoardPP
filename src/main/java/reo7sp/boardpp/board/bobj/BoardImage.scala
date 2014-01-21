@@ -1,12 +1,13 @@
 package reo7sp.boardpp.board.bobj
 
 import reo7sp.boardpp.Tools
-import reo7sp.boardpp.ui.GraphicsObject
-import java.net.URL
-import javax.imageio.ImageIO
+import reo7sp.boardpp.ui.{Renderer, GraphicsObject}
 import reo7sp.boardpp.board.BoardObject
-import org.newdawn.slick.{Color, Image, Graphics}
-import org.newdawn.slick.util.BufferedImageUtil
+import com.badlogic.gdx.graphics.{Color, Texture}
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
+import com.badlogic.gdx.Gdx
+import java.net.URL
+import reo7sp.boardpp.util.RenderUtils
 
 /**
  * Created by reo7sp on 12/30/13 at 2:07 PM
@@ -14,18 +15,40 @@ import org.newdawn.slick.util.BufferedImageUtil
 case class BoardImage(id: Int) extends BoardObject with GraphicsObject {
   val toolID: Int = Tools.image
   private[this] var _url: URL = null
-  private[this] var _img: Image = null
+  private[this] var _img: Texture = null
+  private[this] var loader: Thread = null
   var w, h = 0
 
-  def render(g: Graphics): Unit = if (img == null) {
-    g.setColor(Color.black)
-    g.drawLine(x, y, x + (if (w < 1) 32 else w), y + (if (h < 1) 32 else h))
-    g.drawLine(x + (if (w < 1) 32 else w), y, x, y + (if (h < 1) 32 else h))
+  def render(): Unit = if (img == null) {
+    Renderer.batch.end()
+    Renderer.shape.begin(ShapeType.Line)
+
+    Renderer.shape.setColor(Color.BLACK)
+    Renderer.shape.rect(x, y, if (w < 1) 32 else w, if (h < 1) 32 else h)
+
+    if (loader == null) {
+      Renderer.shape.line(x, y, x + (if (w < 1) 32 else w), y + (if (h < 1) 32 else h))
+      Renderer.shape.line(x + (if (w < 1) 32 else w), y, x, y + (if (h < 1) 32 else h))
+
+      Renderer.shape.end()
+      Renderer.batch.begin()
+    } else {
+      Renderer.shape.end()
+      Renderer.batch.begin()
+
+      val msg = "Загрузка..."
+      val bounds = Renderer.font.getBounds(msg)
+      val w1 = bounds.width
+      val h1 = bounds.height
+      val x1 = x - w1 / 2 + w / 2
+      val y1 = y - h1 / 2 + h / 2
+      Renderer.font.setColor(Color.BLACK)
+      Renderer.font.draw(Renderer.batch, msg, x1, y1)
+    }
   } else {
-    g.drawImage(
+    Renderer.batch.draw(
       img,
-      x, y, x + (if (w < 1) img.getWidth else w), y + (if (h < 1) img.getHeight else h),
-      0, 0, img.getWidth, img.getHeight
+      x, y, if (w < 1) img.getWidth else w, if (h < 1) img.getHeight else h
     )
   }
 
@@ -37,21 +60,37 @@ case class BoardImage(id: Int) extends BoardObject with GraphicsObject {
 
   def url = _url
 
-  def url_=(p1: URL): Unit = {
-    if (_url != p1) {
-      _url = p1
-      _img = null
-    }
+  def url_=(p1: URL): Unit = if (_url != p1) {
+    _url = p1
+    Gdx.app.postRunnable(new Runnable {
+      def run(): Unit = if (_img != null) {
+        _img.dispose()
+        _img = null
+      } else if (loader != null) {
+        loader.interrupt()
+        loader = null
+      }
+    })
   }
 
   def img = {
-    if (_img == null && url != null) {
-      _img = try {
-        new Image(BufferedImageUtil.getTexture(url.toString, ImageIO.read(url)))
-      } catch {
-        case e: Throwable => null
-      }
+    if (_img == null && _url != null && loader == null) {
+      loader = newImgLoader
+      loader.start()
     }
     _img
+  }
+
+  private[this] def newImgLoader = new Thread() {
+    override def run(): Unit = {
+      val pixmap = RenderUtils.readImg(url)
+      if (!isInterrupted) {
+        Gdx.app.postRunnable(new Runnable {
+          def run(): Unit = _img = new Texture(pixmap)
+        })
+      } else {
+        pixmap.dispose()
+      }
+    }
   }
 }

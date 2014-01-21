@@ -1,38 +1,34 @@
 package reo7sp.boardpp.board.bobj
 
 import reo7sp.boardpp.Tools
-import reo7sp.boardpp.ui.GraphicsObject
+import reo7sp.boardpp.ui.{Renderer, GraphicsObject}
 import reo7sp.boardpp.board.BoardObject
-import org.newdawn.slick.{Graphics, Color}
 import reo7sp.boardpp.util.Colors
-import org.newdawn.slick.fills.GradientFill
-import org.newdawn.slick.geom.{Rectangle, Shape}
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 
 /**
  * Created by reo7sp on 12/30/13 at 2:07 PM
  */
 case class BoardShape(id: Int) extends BoardObject with GraphicsObject {
-  val toolID: Int = Tools.shape
+  val toolID: Int = Tools.rect
   var w, h = 100
-  var color1 = Color.red
-  var color2 = Color.blue
-  private[this] var gradient: GradientFill = null
-  private[this] var shape: Shape = null
+  var color1 = Color.RED
+  var color2 = Color.BLUE
 
-  invalidateGradient()
+  def render(): Unit = {
+    Renderer.batch.end()
+    Renderer.shape.begin(ShapeType.Filled)
 
-  def render(g: Graphics): Unit = {
-    g.fill(shape, gradient)
+    Renderer.shape.rect(x, y, w, h, color1, color1, color2, color2)
+
+    Renderer.shape.end()
+    Renderer.batch.begin()
   }
 
   def update(): Unit = ()
 
-  def toArray: Array[String] = Array(x.toString, y.toString, w.toString, h.toString, Colors.toStr(color1), Colors.toStr(color2))
+  def toArray: Array[String] = Array(x.toString, y.toString, w.toString, h.toString, Colors.toString(color1), Colors.toString(color2))
 
   def toGraphicsObject: GraphicsObject = this
-
-  def invalidateGradient(): Unit = {
-    gradient = new GradientFill(x, y, color1, x, y + h, color2)
-    shape = new Rectangle(x, y, w, h)
-  }
 }

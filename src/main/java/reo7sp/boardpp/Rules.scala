@@ -1,4 +1,4 @@
-package reo7sp.boardpp.board
+package reo7sp.boardpp
 
 /**
  * Created by reo7sp on 1/3/14 at 12:29 AM

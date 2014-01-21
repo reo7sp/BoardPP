@@ -1,7 +1,8 @@
 package reo7sp.boardpp.ui.widgets.my
 
-import org.newdawn.slick.{Color, Graphics}
-import reo7sp.boardpp.ui.Mouse
+import reo7sp.boardpp.ui.{Renderer, Mouse}
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 
 /**
  * Created by reo7sp on 1/7/14 at 3:00 PM
@@ -11,18 +12,32 @@ class Slider extends Component {
   var actionOnChange: (Int) => Any = null
   private[this] var sliding = false
 
-  override def render(g: Graphics): Unit = {
-    super.render(g)
+  override def render(): Unit = {
+    super.render()
 
-    g.setColor(Color.lightGray)
-    g.fillRect(realX, realY + height / 2 - 4, width, 8)
-    g.setColor(Color.gray)
-    g.drawRect(realX, realY + height / 2 - 4, width, 8)
+    Renderer.batch.end()
 
-    g.setColor(Color.white)
-    g.fillRect(realX + (cur - min) * width / (max - min), realY + height / 2 - 8, 8, 16)
-    g.setColor(Color.lightGray)
-    g.drawRect(realX + (cur - min) * width / (max - min), realY + height / 2 - 8, 8, 16)
+    Renderer.shape.begin(ShapeType.Filled)
+    Renderer.shape.setColor(Color.LIGHT_GRAY)
+    Renderer.shape.rect(realX, realY + height / 2 - 4, width, 8)
+    Renderer.shape.end()
+
+    Renderer.shape.begin(ShapeType.Line)
+    Renderer.shape.setColor(Color.GRAY)
+    Renderer.shape.rect(realX, realY + height / 2 - 4, width, 8)
+    Renderer.shape.end()
+
+    Renderer.shape.begin(ShapeType.Filled)
+    Renderer.shape.setColor(Color.WHITE)
+    Renderer.shape.rect(realX + (cur - min) * width / (max - min), realY + height / 2 - 8, 8, 16)
+    Renderer.shape.end()
+
+    Renderer.shape.begin(ShapeType.Line)
+    Renderer.shape.setColor(Color.LIGHT_GRAY)
+    Renderer.shape.rect(realX + (cur - min) * width / (max - min), realY + height / 2 - 8, 8, 16)
+    Renderer.shape.end()
+
+    Renderer.batch.begin()
   }
 
   override def update(): Unit = if (sliding) {
@@ -36,7 +51,7 @@ class Slider extends Component {
 
   override def onMousePressed(): Unit = {
     super.onMousePressed()
-    sliding = true
+    if (canClick) sliding = true
   }
 
   override def onMouseReleased(): Unit = {

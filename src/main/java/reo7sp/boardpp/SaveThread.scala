@@ -1,5 +1,7 @@
 package reo7sp.boardpp
 
+import reo7sp.boardpp.board.BoardSession
+
 /**
  * Created by reo7sp on 1/1/14 at 4:12 PM
  */
@@ -9,9 +11,9 @@ object SaveThread extends Thread("SaveThread") {
 
   override def run(): Unit = while (!isInterrupted) {
     Thread.sleep(15000)
-    if (Canvas.board != null && Canvas.board.file != null) {
+    if (BoardSession.board != null && BoardSession.board.file != null) {
       saving = true
-      Canvas.board.synchronized(Canvas.board.save())
+      BoardSession.board.synchronized(BoardSession.board.save())
       saving = false
       lastSave = System.currentTimeMillis()
     }

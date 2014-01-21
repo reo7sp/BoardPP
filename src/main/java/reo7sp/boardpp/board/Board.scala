@@ -5,12 +5,12 @@ import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 import org.json.{JSONArray, JSONObject}
 import reo7sp.boardpp.Core
+import reo7sp.boardpp.util.Colors
 
 /**
  * Created by reo7sp on 12/4/13 at 10:38 PM
  */
 class Board private() {
-  var name = "Безымянная доска"
   val pages = new ArrayBuffer[BoardPage]
   var curPageID = 0
   var file: File = null
@@ -19,8 +19,7 @@ class Board private() {
     val writer = new PrintWriter(file)
     val json = new JSONObject
 
-    json.put("name", name)
-    json.put("version", Core.version)
+    json.put("version", Core.versionInt)
     json.put("encoding", System.getProperty("file.encoding"))
 
     val jsonPages = new JSONArray
@@ -49,6 +48,18 @@ class Board private() {
       }
       jsonPage.put("rules", jsonRules)
 
+      val jsonPoints = new JSONArray
+      for (point <- page.canvas.points) {
+        val jsonPoint = new JSONObject
+        jsonPoint.put("x", point.x)
+        jsonPoint.put("y", point.y)
+        jsonPoint.put("color", point.color)
+        jsonPoint.put("radius", point.radius)
+
+        jsonPoints.put(jsonPoint)
+      }
+      jsonPage.put("points", jsonPoints)
+
       jsonPages.put(jsonPage)
     }
     json.put("pages", jsonPages)
@@ -66,15 +77,7 @@ class Board private() {
 
   def -=(page: BoardPage): Board = {
     pages -= page
-    page.destroy()
     this
-  }
-
-  def destroy(): Unit = {
-    for (page <- pages) {
-      page.destroy()
-    }
-    pages.clear()
   }
 }
 
@@ -92,7 +95,6 @@ object Board {
     }
 
     board.file = f
-    board.name = json.optString("name", "Безымянная доска")
 
     val jsonPages = json.optJSONArray("pages")
     if (jsonPages != null) for (i <- 0 until jsonPages.length()) {
@@ -106,8 +108,8 @@ object Board {
         val toolID = jsonElem.getInt("toolID")
         val jsonElemData = jsonElem.getJSONArray("data")
         val data = new Array[String](jsonElemData.length())
-        for (j <- 0 until jsonElemData.length()) {
-          data(j) = jsonElemData.getString(j)
+        for (k <- 0 until jsonElemData.length()) {
+          data(k) = jsonElemData.getString(k)
         }
         page += BoardObject.newInstance(id, toolID, data)
       }
@@ -119,10 +121,20 @@ object Board {
         val ruleID = jsonRule.getInt("ruleID")
         val jsonRuleData = jsonRule.getJSONArray("data")
         val data = new Array[String](jsonRuleData.length())
-        for (j <- 0 until jsonRuleData.length()) {
-          data(j) = jsonRuleData.getString(j)
+        for (k <- 0 until jsonRuleData.length()) {
+          data(k) = jsonRuleData.getString(k)
         }
         page += BoardRule.newInstance(id, ruleID, data)
+      }
+
+      val jsonPoints = jsonPage.optJSONArray("points")
+      if (jsonPoints != null) for (j <- 0 until jsonPoints.length()) {
+        val jsonPoint = jsonPoints.optJSONObject(j)
+        val x = jsonPoint.getInt("x")
+        val y = jsonPoint.getInt("y")
+        val color = Colors.toGdx(jsonPoint.getString("color"))
+        val radius = jsonPoint.getInt("radius")
+        page.canvas.+=(x, y, color, radius)
       }
 
       board += page

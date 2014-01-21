@@ -1,36 +1,53 @@
 package reo7sp.boardpp.ui
 
-import reo7sp.boardpp.{Tools, Canvas}
-import scala.util.Random
+import reo7sp.boardpp.Tools
 import reo7sp.boardpp.ui.bobjeditor.{BoardLineEditor, BoardShapeEditor, BoardImageEditor, BoardTextEditor}
-import org.newdawn.slick.{Color, Graphics}
 import reo7sp.boardpp.board.bobj.{BoardLine, BoardShape, BoardImage, BoardText}
-import reo7sp.boardpp.util.RenderUtil
+import reo7sp.boardpp.util.RenderUtils
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
+import reo7sp.boardpp.board.BoardSession
+import com.badlogic.gdx.Gdx
 
 /**
  * Created by reo7sp on 11/30/13 at 5:16 PM
  */
 object BoardRenderer extends GraphicsObject {
   private[this] var drawing = false
-  private[this] val gArray = Array(page.canvasG, page.highlightG)
 
-  def render(g: Graphics): Unit = {
-    Canvas.tool match {
-      case Tools.pen | Tools.highlighter | Tools.eraser => draw()
-      case _ =>
-    }
-    page.update()
+  def render(): Unit = {
     page.render()
-    g.drawImage(page.img, 0, 0)
-    g.setColor(Color.blue)
-    if (Mouse.dragging) Canvas.tool match {
-      case Tools.line => g.drawLine(Mouse.dragStartX, Mouse.dragStartY, Mouse.x, Mouse.y)
-      case Tools.shape => g.drawRect(Mouse.dragStartX, Mouse.dragStartY, Mouse.x - Mouse.dragStartX, Mouse.y - Mouse.dragStartY)
-      case _ =>
+    if (Mouse.dragging) {
+      Renderer.batch.end()
+      Renderer.shape.begin(ShapeType.Line)
+
+      Renderer.shape.setColor(Color.BLUE)
+      BoardSession.tool match {
+        case Tools.line => Renderer.shape.line(Mouse.dragStartX, Mouse.dragStartY, Mouse.x, Mouse.y)
+        case Tools.`rect` => Renderer.shape.rect(Mouse.dragStartX, Mouse.dragStartY, Mouse.x - Mouse.dragStartX, Mouse.y - Mouse.dragStartY)
+        case _ =>
+      }
+
+      Renderer.shape.end()
+      Renderer.batch.begin()
+    }
+    if (ShapeGetter.busy) {
+      Renderer.font.setColor(Color.BLACK)
+      val msg = "Выделите регион, чтобы продолжить"
+      val bounds = Renderer.font.getBounds(msg)
+      Renderer.font.draw(
+        Renderer.batch,
+        msg,
+        Gdx.graphics.getWidth / 2 - bounds.width / 2,
+        Gdx.graphics.getHeight / 2 - bounds.height / 2
+      )
     }
   }
 
-  def update(): Unit = ()
+  def update(): Unit = BoardSession.tool match {
+    case Tools.pen | Tools.eraser => draw()
+    case _ =>
+  }
 
   override def onMousePressed(): Unit = if (Mouse.x < ToolPanel.x) {
     drawing = true
@@ -38,13 +55,13 @@ object BoardRenderer extends GraphicsObject {
 
   override def onMouseReleased(): Unit = if (drawing) {
     drawing = false
-    Canvas.tool match {
+    BoardSession.tool match {
       case Tools.cursor => cursor()
       case _ => edit()
     }
-    if (!Canvas.editing && Canvas.tool == Tools.line) {
+    if (!BoardSession.editing && BoardSession.tool == Tools.line) {
       page.rules.foreach(_.onLine(Mouse.dragStartX, Mouse.dragStartY, Mouse.x, Mouse.y))
-    } else if (Canvas.tool == Tools.cursor) {
+    } else if (BoardSession.tool == Tools.cursor) {
       page.rules.foreach(_.onClick(Mouse.x, Mouse.y))
     }
   }
@@ -53,75 +70,72 @@ object BoardRenderer extends GraphicsObject {
     val elems = page.elements.filter(elem => elem.x < Mouse.x && Mouse.x < elem.x + 32 && elem.y < Mouse.y && Mouse.y < elem.y + 32)
     if (elems.nonEmpty) {
       elems(0) match {
-        case elem: BoardText => if (Canvas.editing) BoardTextEditor(elem)
-        case elem: BoardImage => if (Canvas.editing) BoardImageEditor(elem)
-        case elem: BoardShape => if (Canvas.editing) BoardShapeEditor(elem)
-        case elem: BoardLine => if (Canvas.editing) BoardLineEditor(elem)
+        case elem: BoardText => if (BoardSession.editing) BoardTextEditor(elem)
+        case elem: BoardImage => if (BoardSession.editing) BoardImageEditor(elem)
+        case elem: BoardShape => if (BoardSession.editing) BoardShapeEditor(elem)
+        case elem: BoardLine => if (BoardSession.editing) BoardLineEditor(elem)
       }
     }
   }
 
   private[this] def draw(): Unit = if (drawing) {
-    if (Canvas.tool == Tools.eraser) {
-      val size = Canvas.thickness * 8
-
-      for (g <- gArray) {
-        g.setDrawMode(Graphics.MODE_COLOR_MULTIPLY)
-        g.setColor(Color.transparent)
-        RenderUtil.makeDiagonalLine(
-          Mouse.lastX, Mouse.lastY, Mouse.x, Mouse.y,
-          (x, y) => g.fillOval(x - size / 2, y - size / 2, size, size)
-        )
-        g.setDrawMode(Graphics.MODE_NORMAL)
-      }
+    if (BoardSession.tool == Tools.eraser) {
+      BoardSession.board.curPage.canvas.-=(Mouse.x, Mouse.y, BoardSession.radius * 16)
     } else {
-      val size = Canvas.thickness * (if (Canvas.tool == Tools.pen) 1 else 8)
-      RenderUtil.makeDiagonalLine(
+      RenderUtils.makeDiagonalLine(
         Mouse.lastX, Mouse.lastY, Mouse.x, Mouse.y,
-        (x, y) => page.g.fillOval(x - size / 2, y - size / 2, size, size)
+        BoardSession.board.curPage.canvas.+=
       )
     }
-    page.invalidate()
   }
 
-  private[this] def edit(): Unit = if (Canvas.editing) {
-    Canvas.tool match {
+  private[this] def edit(): Unit = if (BoardSession.editing) try {
+    BoardSession.tool match {
       case Tools.text =>
-        val elem = new BoardText(Random.nextInt())
+        val elem = new BoardText(page.lastElementID + 1)
         elem.x = Mouse.x
         elem.y = Mouse.y
-        page += elem
         BoardTextEditor(elem)
+        page += elem
 
       case Tools.image =>
-        val elem = new BoardImage(Random.nextInt())
+        val elem = new BoardImage(page.lastElementID + 1)
         elem.x = Mouse.x
         elem.y = Mouse.y
-        page += elem
         BoardImageEditor(elem)
+        page += elem
 
-      case Tools.shape =>
-        val elem = new BoardShape(Random.nextInt())
+      case Tools.rect => if (ShapeGetter.free) {
+        val elem = new BoardShape(page.lastElementID + 1)
         elem.x = math.min(Mouse.dragStartX, Mouse.x)
         elem.y = math.min(Mouse.dragStartY, Mouse.y)
         elem.w = math.abs(Mouse.x - Mouse.dragStartX)
         elem.h = math.abs(Mouse.y - Mouse.dragStartY)
-        elem.invalidateGradient()
-        page += elem
         BoardShapeEditor(elem)
+        page += elem
+      } else {
+        ShapeGetter.onRect(
+          math.min(Mouse.dragStartX, Mouse.x),
+          math.min(Mouse.dragStartY, Mouse.y),
+          math.max(Mouse.dragStartX, Mouse.x),
+          math.max(Mouse.dragStartY, Mouse.y)
+        )
+      }
 
       case Tools.line =>
-        val elem = new BoardLine(Random.nextInt())
-        elem.x = math.min(Mouse.dragStartX, Mouse.x)
-        elem.y = math.min(Mouse.dragStartY, Mouse.y)
-        elem.x2 = math.abs(Mouse.x - Mouse.dragStartX)
-        elem.x2 = math.abs(Mouse.y - Mouse.dragStartY)
-        page += elem
+        val elem = new BoardLine(page.lastElementID + 1)
+        elem.x = Mouse.dragStartX
+        elem.y = Mouse.dragStartY
+        elem.x2 = Mouse.x
+        elem.y2 = Mouse.y
         BoardLineEditor(elem)
+        page += elem
 
       case _ =>
     }
+  } catch {
+    case _: Throwable =>
   }
 
-  def page = Canvas.board.curPage
+  def page = BoardSession.board.curPage
 }

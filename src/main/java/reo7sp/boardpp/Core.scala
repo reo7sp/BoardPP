@@ -6,7 +6,8 @@ import reo7sp.boardpp.ui.{CrashFrame, Renderer}
  * Created by reo7sp on 11/27/13 at 4:01 PM
  */
 object Core extends App {
-  val version = 0.1
+  val version = "0.1.1"
+  val versionInt = 2
   val name = "Board++ " + version + " by Reo_SP"
 
   try {

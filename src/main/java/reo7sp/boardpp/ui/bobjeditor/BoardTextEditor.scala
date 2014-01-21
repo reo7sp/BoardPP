@@ -4,12 +4,12 @@ import javax.swing._
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.event.{ChangeEvent, ChangeListener, DocumentEvent, DocumentListener}
 import javax.swing.border.EmptyBorder
-import reo7sp.boardpp.util.SpecChars
+import reo7sp.boardpp.util.CharMap
 import reo7sp.boardpp.ui.ImageFactory
-import reo7sp.boardpp.Canvas
 import java.awt._
 import reo7sp.boardpp.board.bobj.BoardText
 import reo7sp.boardpp.ui.widgets.awt.{FancyButton, FancyTextField}
+import reo7sp.boardpp.board.BoardSession
 
 /**
  * Created by reo7sp on 12/27/13 at 9:49 PM
@@ -82,20 +82,20 @@ case class BoardTextEditor(bobj: BoardText) extends JFrame("Редактиров
       }
 
       val tabbedPane = new JTabbedPane
-      newSpecCharPanel("Стрелки", SpecChars.arrows)
-      newSpecCharPanel("Треугольники", SpecChars.triangles)
-      newSpecCharPanel("Дроби", SpecChars.ratios)
-      newSpecCharPanel("Круги", SpecChars.circles)
-      newSpecCharPanel("Математика", SpecChars.math)
-      newSpecCharPanel("Деньги", SpecChars.money)
-      newSpecCharPanel("Погода", SpecChars.weather)
-      newSpecCharPanel("Да/Нет", SpecChars.yesNo)
-      newSpecCharPanel("Значки", SpecChars.icons)
-      newSpecCharPanel("Буквы", SpecChars.letters)
-      newSpecCharPanel("Звёзды", SpecChars.stars)
-      newSpecCharPanel("Музыка", SpecChars.music)
-      newSpecCharPanel("Зодиак", SpecChars.zodiac)
-      newSpecCharPanel("Смайлики", SpecChars.smiley)
+      newSpecCharPanel("Стрелки", CharMap.arrows)
+      newSpecCharPanel("Треугольники", CharMap.triangles)
+      newSpecCharPanel("Дроби", CharMap.ratios)
+      newSpecCharPanel("Круги", CharMap.circles)
+      newSpecCharPanel("Математика", CharMap.math)
+      newSpecCharPanel("Деньги", CharMap.money)
+      newSpecCharPanel("Погода", CharMap.weather)
+      newSpecCharPanel("Да/Нет", CharMap.yesNo)
+      newSpecCharPanel("Значки", CharMap.icons)
+      newSpecCharPanel("Буквы", CharMap.letters)
+      newSpecCharPanel("Звёзды", CharMap.stars)
+      newSpecCharPanel("Музыка", CharMap.music)
+      newSpecCharPanel("Зодиак", CharMap.zodiac)
+      newSpecCharPanel("Смайлики", CharMap.smiley)
       add(tabbedPane)
 
       setSize(600, 800)
@@ -148,7 +148,7 @@ case class BoardTextEditor(bobj: BoardText) extends JFrame("Редактиров
   deleteButton.setIcon(ImageFactory.getAwtIcon("delete.png"))
   deleteButton.addActionListener(new ActionListener {
     def actionPerformed(p1: ActionEvent): Unit = {
-      Canvas.board.curPage -= bobj
+      BoardSession.board.curPage -= bobj
       dispose()
     }
   })
@@ -180,7 +180,6 @@ case class BoardTextEditor(bobj: BoardText) extends JFrame("Редактиров
     bobj.content = editArea.getText
     bobj.x = xText.getValue.toString.toInt
     bobj.y = yText.getValue.toString.toInt
-    bobj.page.invalidate()
     repaint()
   }
 }

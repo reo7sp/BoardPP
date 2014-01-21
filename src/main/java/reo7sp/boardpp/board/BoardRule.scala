@@ -1,6 +1,7 @@
 package reo7sp.boardpp.board
 
 import reo7sp.boardpp.board.brul.{ShowMsgOnLineRule, ShowMsgOnClickRule}
+import reo7sp.boardpp.Rules
 
 /**
  * Created by reo7sp on 1/2/14 at 11:54 PM

@@ -1,15 +1,15 @@
 package reo7sp.boardpp.ui
 
-import reo7sp.boardpp.board.{Rules, BoardRule, BoardPage}
+import reo7sp.boardpp.board.{BoardSession, BoardRule, BoardPage}
 import javax.swing._
-import reo7sp.boardpp.Canvas
 import java.awt.BorderLayout
 import java.awt.event._
 import reo7sp.boardpp.util.Colors
 import javax.swing.event.{DocumentEvent, DocumentListener, ChangeEvent, ChangeListener}
 import reo7sp.boardpp.board.brul.{ShowMsgOnLineRule, ShowMsgOnClickRule}
-import scala.util.Random
 import reo7sp.boardpp.ui.widgets.awt.{FancyButton, FancyTextField}
+import reo7sp.boardpp.Rules
+import reo7sp.boardpp.ui.ShapeGetter.ShapeListener
 
 /**
  * Created by reo7sp on 1/3/14 at 1:15 AM
@@ -22,7 +22,7 @@ case class BoardRulesEditor(page: BoardPage) extends JFrame("Редактиро�
   rulesList.setLayout(new BoxLayout(rulesList, BoxLayout.PAGE_AXIS))
   add(new JScrollPane(rulesList))
 
-  for (rule <- Canvas.board.curPage.rules) addRule(rule)
+  for (rule <- BoardSession.board.curPage.rules) addRule(rule)
 
   val buttonsPanel = new JPanel
   add(buttonsPanel, BorderLayout.SOUTH)
@@ -90,7 +90,7 @@ case class BoardRulesEditor(page: BoardPage) extends JFrame("Редактиро�
   def updBtns(): Unit = {
     var i = 0
     for (c <- rulesList.getComponents) {
-      c.setBackground(Colors.toAWT(if (i == curBtnID) Colors.blue else Colors.gray))
+      c.setBackground(Colors.toAwt(if (i == curBtnID) Colors.blue else Colors.gray))
       i += 1
     }
     repaint()
@@ -99,16 +99,19 @@ case class BoardRulesEditor(page: BoardPage) extends JFrame("Редактиро�
 
 object BoardRulesEditor {
   private def showAdder(window: BoardRulesEditor): Unit = {
+    window.setVisible(false)
+
     val frame = new JFrame("Выберите тип правила")
     frame.setSize(800, 600)
     frame.setLocationRelativeTo(null)
 
     def onRuleIDFound(ruleID: Int): Unit = {
       frame.dispose()
+      window.setVisible(true)
       val rule = ruleID match {
         case -1 => null
-        case Rules.showMsgOnClickRule => new ShowMsgOnClickRule(Random.nextInt())
-        case Rules.showMsgOnLineRule => new ShowMsgOnLineRule(Random.nextInt())
+        case Rules.showMsgOnClickRule => new ShowMsgOnClickRule(window.page.lastRuleID + 1)
+        case Rules.showMsgOnLineRule => new ShowMsgOnLineRule(window.page.lastRuleID + 1)
       }
       if (rule == null) return
 
@@ -144,7 +147,10 @@ object BoardRulesEditor {
     val cancelButton = new FancyButton
     cancelButton.setText("Отмена")
     cancelButton.addActionListener(new ActionListener {
-      def actionPerformed(p1: ActionEvent): Unit = frame.dispose()
+      def actionPerformed(p1: ActionEvent): Unit = {
+        frame.dispose()
+        window.setVisible(true)
+      }
     })
     frame.add(cancelButton, BorderLayout.SOUTH)
 
@@ -154,7 +160,12 @@ object BoardRulesEditor {
   private def showEditor(window: BoardRulesEditor, rule: BoardRule): Unit = BoardRuleEditor(window, rule)
 
   private case class BoardRuleEditor(window: BoardRulesEditor, rule: BoardRule) {
+    window.setVisible(false)
+
     val frame = new JFrame("Редактирование правила")
+    frame.addWindowListener(new WindowAdapter {
+      override def windowClosing(e: WindowEvent): Unit = window.setVisible(true)
+    })
     frame.setSize(400, 600)
     frame.setLocationRelativeTo(null)
 
@@ -170,7 +181,10 @@ object BoardRulesEditor {
     cancelButton.setIcon(ImageFactory.getAwtIcon("cancel.png"))
     cancelButton.setToolTipText("Отмена")
     cancelButton.addActionListener(new ActionListener {
-      def actionPerformed(p1: ActionEvent): Unit = frame.dispose()
+      def actionPerformed(p1: ActionEvent): Unit = {
+        frame.dispose()
+        window.setVisible(true)
+      }
     })
     buttonsPanel.add(cancelButton)
 
@@ -181,6 +195,7 @@ object BoardRulesEditor {
       def actionPerformed(p1: ActionEvent): Unit = {
         update()
         frame.dispose()
+        window.setVisible(true)
       }
     })
     buttonsPanel.add(saveButton)
@@ -223,10 +238,7 @@ object BoardRulesEditor {
       val x1Text = new JSpinner(new SpinnerNumberModel(brul.x1, 0, 9999, 10))
       x1Text.setBounds(100, 10, 50, 25)
       x1Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.x1 = x1Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.x1 = x1Text.getValue.toString.toInt
       })
       coordsPanel.add(x1Text)
 
@@ -237,10 +249,7 @@ object BoardRulesEditor {
       val y1Text = new JSpinner(new SpinnerNumberModel(brul.y1, 0, 9999, 10))
       y1Text.setBounds(260, 10, 50, 25)
       y1Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.y1 = y1Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.y1 = y1Text.getValue.toString.toInt
       })
       coordsPanel.add(y1Text)
 
@@ -253,10 +262,7 @@ object BoardRulesEditor {
       val x2Text = new JSpinner(new SpinnerNumberModel(brul.x2, 0, 9999, 10))
       x2Text.setBounds(100, 60, 50, 25)
       x2Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.x2 = x2Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.x2 = x2Text.getValue.toString.toInt
       })
       coordsPanel.add(x2Text)
 
@@ -267,12 +273,37 @@ object BoardRulesEditor {
       val y2Text = new JSpinner(new SpinnerNumberModel(brul.y2, 0, 9999, 10))
       y2Text.setBounds(260, 60, 50, 25)
       y2Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.y2 = y2Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.y2 = y2Text.getValue.toString.toInt
       })
       coordsPanel.add(y2Text)
+
+      // ---
+
+      val rectButton = new FancyButton
+      rectButton.setIcon(ImageFactory.getAwtIcon("cursor.png"))
+      rectButton.setBounds(320, 40, 50, 50)
+      rectButton.addActionListener(new ActionListener {
+        def actionPerformed(p1: ActionEvent): Unit = {
+          frame.setVisible(false)
+
+          ShapeGetter.+=(new ShapeListener {
+            def onRect(x1: Int, y1: Int, x2: Int, y2: Int): Unit = {
+              x1Text.setValue(x1)
+              y1Text.setValue(y1)
+              x2Text.setValue(x2)
+              y2Text.setValue(y2)
+
+              brul.x1 = x1Text.getValue.toString.toInt
+              brul.y1 = y1Text.getValue.toString.toInt
+              brul.x2 = x2Text.getValue.toString.toInt
+              brul.y2 = y2Text.getValue.toString.toInt
+
+              frame.setVisible(true)
+            }
+          })
+        }
+      })
+      coordsPanel.add(rectButton)
     }
 
     def showEditor(brul: ShowMsgOnLineRule): Unit = {
@@ -300,10 +331,7 @@ object BoardRulesEditor {
       val x11Text = new JSpinner(new SpinnerNumberModel(brul.x11, 0, 9999, 10))
       x11Text.setBounds(100, 10, 50, 25)
       x11Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.x11 = x11Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.x11 = x11Text.getValue.toString.toInt
       })
       coordsPanel.add(x11Text)
 
@@ -314,10 +342,7 @@ object BoardRulesEditor {
       val y11Text = new JSpinner(new SpinnerNumberModel(brul.y11, 0, 9999, 10))
       y11Text.setBounds(260, 10, 50, 25)
       y11Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.y11 = y11Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.y11 = y11Text.getValue.toString.toInt
       })
       coordsPanel.add(y11Text)
 
@@ -330,10 +355,7 @@ object BoardRulesEditor {
       val x12Text = new JSpinner(new SpinnerNumberModel(brul.x12, 0, 9999, 10))
       x12Text.setBounds(100, 60, 50, 25)
       x12Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.x12 = x12Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.x12 = x12Text.getValue.toString.toInt
       })
       coordsPanel.add(x12Text)
 
@@ -344,12 +366,37 @@ object BoardRulesEditor {
       val y12Text = new JSpinner(new SpinnerNumberModel(brul.y12, 0, 9999, 10))
       y12Text.setBounds(260, 60, 50, 25)
       y12Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.y12 = y12Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.y12 = y12Text.getValue.toString.toInt
       })
       coordsPanel.add(y12Text)
+
+      // ---
+
+      val rect1Button = new FancyButton
+      rect1Button.setIcon(ImageFactory.getAwtIcon("cursor.png"))
+      rect1Button.setBounds(320, 40, 50, 50)
+      rect1Button.addActionListener(new ActionListener {
+        def actionPerformed(p1: ActionEvent): Unit = {
+          frame.setVisible(false)
+
+          ShapeGetter.+=(new ShapeListener {
+            def onRect(x1: Int, y1: Int, x2: Int, y2: Int): Unit = {
+              x11Text.setValue(x1)
+              y11Text.setValue(y1)
+              x12Text.setValue(x2)
+              y12Text.setValue(y2)
+
+              brul.x11 = x11Text.getValue.toString.toInt
+              brul.y11 = y11Text.getValue.toString.toInt
+              brul.x12 = x12Text.getValue.toString.toInt
+              brul.y12 = y12Text.getValue.toString.toInt
+
+              frame.setVisible(true)
+            }
+          })
+        }
+      })
+      coordsPanel.add(rect1Button)
 
       // ---
 
@@ -360,10 +407,7 @@ object BoardRulesEditor {
       val x21Text = new JSpinner(new SpinnerNumberModel(brul.x21, 0, 9999, 10))
       x21Text.setBounds(100, 210, 50, 25)
       x21Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.x21 = x21Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.x21 = x21Text.getValue.toString.toInt
       })
       coordsPanel.add(x21Text)
 
@@ -374,10 +418,7 @@ object BoardRulesEditor {
       val y21Text = new JSpinner(new SpinnerNumberModel(brul.y21, 0, 9999, 10))
       y21Text.setBounds(260, 210, 50, 25)
       y21Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.y21 = y21Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.y21 = y21Text.getValue.toString.toInt
       })
       coordsPanel.add(y21Text)
 
@@ -390,10 +431,7 @@ object BoardRulesEditor {
       val x22Text = new JSpinner(new SpinnerNumberModel(brul.x22, 0, 9999, 10))
       x22Text.setBounds(100, 260, 50, 25)
       x22Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.x22 = x22Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.x22 = x22Text.getValue.toString.toInt
       })
       coordsPanel.add(x22Text)
 
@@ -404,12 +442,37 @@ object BoardRulesEditor {
       val y22Text = new JSpinner(new SpinnerNumberModel(brul.y22, 0, 9999, 10))
       y22Text.setBounds(260, 260, 50, 25)
       y22Text.addChangeListener(new ChangeListener {
-        def stateChanged(p1: ChangeEvent): Unit = {
-          brul.y22 = y22Text.getValue.toString.toInt
-          window.page.invalidate()
-        }
+        def stateChanged(p1: ChangeEvent): Unit = brul.y22 = y22Text.getValue.toString.toInt
       })
       coordsPanel.add(y22Text)
+
+      // ---
+
+      val rect2Button = new FancyButton
+      rect2Button.setIcon(ImageFactory.getAwtIcon("cursor.png"))
+      rect2Button.setBounds(320, 240, 50, 50)
+      rect2Button.addActionListener(new ActionListener {
+        def actionPerformed(p1: ActionEvent): Unit = {
+          frame.setVisible(false)
+
+          ShapeGetter.+=(new ShapeListener {
+            def onRect(x1: Int, y1: Int, x2: Int, y2: Int): Unit = {
+              x21Text.setValue(x1)
+              y21Text.setValue(y1)
+              x22Text.setValue(x2)
+              y22Text.setValue(y2)
+
+              brul.x21 = x21Text.getValue.toString.toInt
+              brul.y21 = y21Text.getValue.toString.toInt
+              brul.x22 = x22Text.getValue.toString.toInt
+              brul.y22 = y22Text.getValue.toString.toInt
+
+              frame.setVisible(true)
+            }
+          })
+        }
+      })
+      coordsPanel.add(rect2Button)
     }
   }
 

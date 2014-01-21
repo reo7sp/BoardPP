@@ -2,7 +2,7 @@ package reo7sp.boardpp.ui
 
 import javax.swing.{JScrollPane, JTextArea, JFrame}
 import javax.swing.border.EmptyBorder
-import java.awt.{Frame, Graphics, Font, Color}
+import java.awt._
 import reo7sp.boardpp.Core
 
 /**
@@ -10,6 +10,7 @@ import reo7sp.boardpp.Core
  */
 object CrashFrame extends JFrame(Core.name) {
   var crashed = false
+  var count = 0
 
   setSize(800, 600)
   setLocationRelativeTo(null)
@@ -22,11 +23,28 @@ object CrashFrame extends JFrame(Core.name) {
     } catch {
       case e: Throwable => null
     }
+    val color0 = new Color(0, 0, 64)
+    val color1 = new Color(0, 0, 0, 0.5F)
 
-    override def paint(g: Graphics): Unit = {
-      if (img != null) g.drawImage(img, getWidth - img.getWidth(null), getHeight - img.getHeight(null), null)
-      g.setColor(new Color(0, 0, 0, 0.75F))
+    override def paint(rawG: Graphics): Unit = {
+      val g = rawG.asInstanceOf[Graphics2D]
+
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
+      g.setColor(color0)
       g.fillRect(0, 0, getWidth, getHeight)
+      if (img != null) g.drawImage(img, getWidth - img.getWidth(null), getHeight - img.getHeight(null), null)
+
+      val freeMem = Runtime.getRuntime.freeMemory / 1024 / 1024
+      val totalMem = Runtime.getRuntime.totalMemory / 1024 / 1024
+      val usedMem = totalMem - freeMem
+      g.setColor(Color.WHITE)
+      g.drawString("Mem: " + usedMem + "M/" + totalMem + "M", 64, getHeight - 96)
+      g.drawString("Count: " + count, 64, getHeight - 64)
+
+      g.setColor(color1)
+      g.fillRect(0, 0, getWidth, getHeight)
+
       super.paint(g)
     }
   }
@@ -36,32 +54,38 @@ object CrashFrame extends JFrame(Core.name) {
   textArea.setForeground(Color.WHITE)
   textArea.setOpaque(false)
   textArea.setBackground(Color.BLACK)
-  setContentPane(new JScrollPane(textArea))
+
+  private[this] val scrollPane = new JScrollPane(textArea)
+  scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0))
+  setContentPane(scrollPane)
 
   def crash(e: Throwable) {
     if (!crashed) {
+      e.printStackTrace()
+
       val s = new StringBuilder
       s ++= "The program crashed because of this unhandled exception:\n\n"
       s ++= e.toString + "\n"
       e.getStackTrace.foreach(s ++= "    at " + _.toString + "\n")
       if (e.getCause != null) s ++= causeReport(e.getCause)
-      s ++= "\n\nSend this to omorozenkov@gmail.com, so we could fix it"
-      s ++= "\n\nGood luck!"
+      s ++= "\nSend this to omorozenkov@gmail.com, so we could fix it\n"
+      s ++= "\nGood luck!\n"
 
-      e.printStackTrace()
       textArea.setText(s.toString())
       textArea.setCaretPosition(0)
       crashed = true
       setVisible(true)
+
+      new Thread() {
+        override def run(): Unit = while (!isInterrupted) {
+          textArea.repaint()
+          Thread.sleep(500)
+        }
+      }.start()
     } else {
       toFront()
     }
-
-    try {
-      Renderer.container.pause()
-    } catch {
-      case e: Throwable =>
-    }
+    count += 1
   }
 
   private[this] def causeReport(e: Throwable): String = {
